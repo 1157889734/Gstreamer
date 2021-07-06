@@ -1,0 +1,32 @@
+//混流两个视频文件，一左一右
+gst-launch-1.0 filesrc location=11.mp4 ! qtdemux name=demux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=-70 bottom=-70 right=-220 ! videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=1 ! waylandsink filesrc location=test.mp4 ! qtdemux name=demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=-70 bottom=-70 left=-220 ! mix.
+ 
+ //播放4路视频
+
+gst-launch-1.0 filesrc location=11.mp4 ! qtdemux name=demux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=0 bottom=0 right=0 ! videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=0.5 sink_2::alpha=1 sink_3::alpha=0.5 ! waylandsink  filesrc location=22.mp4 ! qtdemux name=demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox  border-alpha=0 top=0 bottom=0 left=-220 ! mix. filesrc location=apink.mp4 ! qtdemux name=demux3 demux3.video_0 ! queue ! decodebin ! videoscale ! videoconvert !  video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=-200 bottom=-200 left=0 ! mix. filesrc location=test.mp4 ! qtdemux name=demux4 demux4.video_0 !  queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=-200 bottom=-200 left=-200 ! mix. 
+
+ 
+  gst-launch-1.0 filesrc location=11.mp4 ! qtdemux name=d
+emux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw
+,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=0 bottom=0 right
+=0 ! videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=0.5 sink_2::
+alpha=1 sink_3::alpha=0.5 ! waylandsink  filesrc location=22.mp4 ! qtdemux name=
+demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-
+raw,format=AYUV,width=200,height=200 ! videobox  border-alpha=0 top=0 bottom=0 l
+eft=-220 ! mix. filesrc location=apink.mp4 ! qtdemux name=demux3 demux3.video_0 
+! queue ! decodebin ! videoscale ! videoconvert !  video/x-raw,format=AYUV,width
+=200,height=200 ! videobox border-alpha=0 top=-200 bottom=-200 left=0 ! mix. fil
+esrc location=2010.mp4 ! qtdemux name=demux4 demux4.video_0 !  queue ! decodebin
+ ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! vi
+deobox border-alpha=0 top=-200 bottom=-200 left=-200 ! mix. 
+
+
+
+//rtsp
+gst-launch-1.0 rtspsrc location=rtsp://admin:admin123@168.168.102.20 latency=300 ! rtph264depay ! h264parse ! queue max-size-time=0 ! mppvideodec  ! waylandsink
+
+
+//mp4
+gst-launch-1.0 filesrc location=11.mp4 ! qtdemux ! queue ! h264parse ! mppvideodec ! waylandsink 
+//mp3
+gst-launch-1.0 filesrc location=001.mp3 ! mpegaudioparse ! mpg123audiodec ! audioconvert ! autoaudiosink 

@@ -1,0 +1,230 @@
+
+//编译
+$CC PlayCamera.c -o PlayCameraH265 `pkg-config --cflags --libs gstreamer-1.0`
+
+gcc -Wall $(pkg-config --cflags --libs gstreamer-0.10) helloworld.c -o helloworld  
+//H265
+gst-launch-1.0 filesrc location=/home/root/1080p_30fps_h265.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+//H264 
+gst-launch-1.0 filesrc location=H264_1080.mp4  typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+//测试
+gst-launch-1.0 videotestsrc ! video/x-raw,format=NV12 ! imxvideoconvert_g2d ! video/x-raw,format=RGB16 ! waylandsink
+gst-launch-1.0 videotestsrc ! video/x-raw,format=NV12,width=1280,height=720 ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=640, height=480 ! waylandsink window-height=300 window-width=512 
+//视频播放控制输出窗口大小
+gst-launch-1.0 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! waylandsink  window-height=300 window-width=512 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! waylandsink  window-height=300 window-width=512 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! waylandsink  window-height=300 window-width=512 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! waylandsink  window-height=300 window-width=512
+//设置4视频同屏显示
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300 ! video/x-raw,format=RGB16 ! waylandsink filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_2 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_3
+
+
+
+gst-launch-1.0 imxcompositor_g2d name=comp \
+sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 \
+sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 \
+sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 \
+sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300 ! \
+video/x-raw,format=RGB16 ! waylandsink \
+v4l2src device=/dev/video0 ! video/x-raw,width=640,height=480 ! comp.sink_0 \
+v4l2src device=/dev/video1 ! video/x-raw,width=640,height=480 ! comp.sink_1 \
+v4l2src device=/dev/video2 ! video/x-raw,width=640,height=480 ! comp.sink_2 \
+v4l2src device=/dev/video3 ! video/x-raw,width=640,height=480 ! comp.sink_3
+
+//一视频
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_0::keep-ratio=true ! video/x-raw, format=RGB16, width=512, height=300 ! waylandsink filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! comp.sink_0
+//两视频
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=512 sink_1::ypos=0 sink_1::width=512 sink_1::height=300 ! video/x-raw,format=RGB16 ! waylandsink filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 
+//三视频
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 ! video/x-raw,format=RGB16 ! waylandsink filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_2
+//显示1图片
+gst-launch-1.0 filesrc location=image.png ! pngdec ! imagefreeze ! videoconvert ! autovideosink
+
+filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_2 filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_3
+filesrc location=H265_1080.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0
+
+
+ gst-launch-1.0 imxcompositor_g2d name=comp sink_1::xpos=160 sink_1::ypos=480 ! glimagesink videotestsrc ! comp.sink_0 videotestsrc ! comp.sink_1
+ 
+ gst-launch-1.0 filesrc location=image.png ! pngdec ! imagefreeze ! videoconvert ! autovideosink
+ 
+ gst-launch-1.0 -v imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300! waylandsink videotestsrc ! comp.sink_0 videotestsrc ! comp.sink_1 videotestsrc ! comp.sink_2 videotestsrc ! comp.sink_3
+ 
+ gst-launch-1.0 -v imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=512 sink_1::width=512 sink_1::height=300 sink_2::xpos=300 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 sink_3::xpos=300 sink_3::ypos=512 sink_3::width=512 sink_3::height=300 waylandsink sync=false filesrc location=H265_1080.mp4 ! typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! tee name=t t. ! queue ! comp.sink_0 t. ! queue ! comp.sink_1 t. ! queue ! comp.sink_2 t. ! queue ! comp.sink_3 
+
+//大华摄像头
+rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif
+rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=1\&unicast=true\&proto=Onvif
+//海康威视摄像头
+rtsp://admin:cx123456@192.168.60.64
+//MP4视频地址
+rtsp://192.168.60.109///home/data/RECORD/hd00/part00/ch3/1233_01_03_20201118_1933.MP4
+
+
+// rtspsrc播放
+gst-launch-1.0 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink 
+
+gst-launch-1.0 -v rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+// playbin播放
+gst-launch-1.0 playbin uri=rtsp://admin:cx123456@192.168.60.64
+
+gst-launch-1.0 playbin uri=rtsp://admin:cx123456@192.168.60.67/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif
+
+gst-launch-1.0 playbin uri=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=1\&unicast=true\&proto=Onvif
+
+gst-launch-1.0 rtspsrc location=rtsp://192.168.60.109///home/data/RECORD/hd00/part00/ch3/1233_01_03_20201118_1933.MP4 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+
+gst-launch-1.0 playbin uri=rtsp://192.168.60.109///home/data/RECORD/hd00/part00/ch3/1233_01_03_20201118_1933.MP4
+
+gst-launch-1.0 playbin uri=rtsp://192.168.30.19:8554/test
+// playbin播放本地文件
+gst-launch-1.0 playbin uri=file:////unit_tests/VPU/hantro/H264_1080.mp4
+
+
+
+//视频多窗体显示：
+gst-launch-1.0 imxcompositor_g2d name=comp 
+sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 
+sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 
+sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 
+sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300 
+! video/x-raw,format=RGB16 ! waylandsink 
+rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 
+rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 
+rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_2 
+rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_3 
+
+//一窗口播放
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300  rotate=1 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! comp.sink_0 
+//两窗口播放
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! comp.sink_0 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! comp.sink_1
+//三窗口播放
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 rtspsrc location=rtsp://admin:cx123456@192.168.60.64  latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_2 
+//海康威视四窗口播放
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_2 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_3 
+//大华摄像头四窗口播放
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_2 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_3 
+
+
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.64 ! rtph264depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 
+
+
+gst-launch-1.0 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif ! rtph265depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+
+
+gst-launch-1.0 playbin uri=rtsp://admin:cx123456@192.168.60.64
+
+//test
+gst-launch-1.0 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif ! rtph265depay ! h265parse ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! waylandsink 
+
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! comp.sink_0 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! comp.sink_1 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! comp.sink_2 rtspsrc location=rtsp://admin:cx123456@192.168.60.64 latency=300 ! rtph264depay ! queue max-size-time=0 ! vpudec ! comp.sink_3 
+
+gst-launch-1.0 imxcompositor_g2d name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=0 sink_1::ypos=300 sink_1::width=512 sink_1::height=300 sink_2::xpos=512 sink_2::ypos=0 sink_2::width=512 sink_2::height=300 sink_3::xpos=512 sink_3::ypos=300 sink_3::width=512 sink_3::height=300 ! video/x-raw,format=RGB16 ! waylandsink rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! comp.sink_0 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! comp.sink_1 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! comp.sink_2 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif latency=300 ! rtph265depay ! queue max-size-time=0 ! vpudec ! comp.sink_3 
+
+
+gst-launch-1.0 filesrc location=test.mp4 ! qtdemux ! h264parse ! mppvideodec ! rkximagesink
+
+gst-inspect-1.0
+//mp4
+gst-launch-1.0 filesrc location=11.mp4 ! qtdemux ! queue ! h264parse ! mppvideodec ! waylandsink 
+//mp3
+gst-launch-1.0 filesrc location=001.mp3 ! mpegaudioparse ! mpg123audiodec ! audioconvert ! autoaudiosink 
+
+queue ! qtdemux  name=dmux dmux.video_0 ! queue
+
+
+//混流两个视频文件，一左一右
+gst-launch-1.0 filesrc location=11.mp4 ! qtdemux name=demux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert !
+ video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=-70 bottom=-70 right=-220 ! videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=1 !
+ waylandsink filesrc location=test.mp4 ! qtdemux name=demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 !
+ videobox border-alpha=0 top=-70 bottom=-70 left=-220 ! mix.
+ 
+ 
+
+gst-launch-1.0 filesrc location=11.mp4 ! qtdemux ! queue ! h264parse ! mppvideodec !  videoconvert ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+
+//rtsp
+gst-launch-1.0 rtspsrc location=rtsp://admin:admin123@168.168.102.20 latency=300 ! rtph264depay ! h264parse ! queue max-size-time=0 ! mppvideodec  ! waylandsink
+
+gst-launch-1.0 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif ! rtph265depay ! h265parse ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! waylandsink 
+
+gst-launch-1.0 rtspsrc location=rtsp://admin:cx123456@192.168.60.67:554/cam/realmonitor?channel=1\&subtype=0\&unicast=true\&proto=Onvif ! rtph265depay ! queue max-size-time=0 ! vpudec ! imxvideoconvert_g2d ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+
+
+gst-launch-1.0 rtspsrc location=rtsp://admin:admin123@168.168.102.20 latency=300 ! rtph264depay ! h264parse ! queue max-size-time=0 ! mppvideodec  ! videoconvert ! video/x-raw, format=RGB16, width=1024, height=600 ! waylandsink
+
+
+rtsp://admin:admin123@168.168.102.20:554/live0
+
+gst-launch-1.0 filesrc location=11.mp4 ! decodebin name=decoder decoder. ! queue ! audioconvert ! audioresample ! osssink decoder. ! videoconvert ! xvimagesink
+
+
+:sout=#transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:rtp{sdp=rtsp://:50152/168.168.102.100} :no-sout-all :sout-keep
+
+
+gst-launch-1.0 rtspsrc location=rtsp://admin:admin123@168.168.102.20:554/live0  latency=0 ! rtph264depay  !  capsfilter caps="video/x-h264"  ! h264parse  ! vaapidecode  !  vaapipostproc  width=800 height=600  !  vaapisink sync=false
+
+
+gst-launch-1.0 videomixer name=comp sink_0::xpos=0 sink_0::ypos=0 sink_0::width=512 sink_0::height=300 sink_1::xpos=512 sink_1::ypos=0 sink_1::width=512 sink_1::height=300 ! video/x-raw,format=RGB16 ! waylandsink filesrc location=11.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! mppvideodec  ! video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_0 filesrc location=11.mp4 typefind=true ! video/quicktime ! aiurdemux ! queue max-size-time=0 ! mppvideodec !  video/x-raw, format=RGB16, width=512, height=300 ! comp.sink_1 
+
+
+//videomixer
+
+
+混流两个视频并播放声音
+gst-launch-1.0 filesrc location=a.mp4 ! qtdemux name=demux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! \
+
+ video/x-raw,format=AYUV,width=200,height=200 ! \
+
+ videobox border-alpha=0 top=-70 bottom=-70 right=-220 ! \
+
+ videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=1 ! \
+
+ autovideosink \
+
+ filesrc location=b.mp4 ! qtdemux name=demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! \
+
+ video/x-raw,format=AYUV,width=200,height=200 ! \
+
+ videobox border-alpha=0 top=-70 bottom=-70 left=-220 ! mix. \
+
+ demux.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! autoaudiosink \
+
+ demux2.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! autoaudiosink
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ gst-launch-1.0 filesrc location=11.mp4 ! qtdemux name=demux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert !
+ video/x-raw,format=AYUV,width=1024,height=600 ! videobox border-alpha=0 top=-70 bottom=-70 right=-220 ! videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=1 !
+ waylandsink filesrc location=test.mp4 ! qtdemux name=demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=1024,height=600 !
+ videobox border-alpha=0 top=-70 bottom=-70 left=-220 ! mix.
+ 
+ 
+ 
+//播放4路视频
+
+gst-launch-1.0 filesrc location=11.mp4 ! qtdemux name=demux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=0 bottom=0 right=0 ! videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=0.5 sink_2::alpha=1 sink_3::alpha=0.5 ! waylandsink  filesrc location=22.mp4 ! qtdemux name=demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox  border-alpha=0 top=0 bottom=0 left=-220 ! mix. filesrc location=apink.mp4 ! qtdemux name=demux3 demux3.video_0 ! queue ! decodebin ! videoscale ! videoconvert !  video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=-200 bottom=-200 left=0 ! mix. filesrc location=test.mp4 ! qtdemux name=demux4 demux4.video_0 !  queue ! decodebin ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=-200 bottom=-200 left=-200 ! mix. 
+
+ 
+  gst-launch-1.0 filesrc location=11.mp4 ! qtdemux name=d
+emux demux.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-raw
+,format=AYUV,width=200,height=200 ! videobox border-alpha=0 top=0 bottom=0 right
+=0 ! videomixer name=mix background=1 sink_0::alpha=1 sink_1::alpha=0.5 sink_2::
+alpha=1 sink_3::alpha=0.5 ! waylandsink  filesrc location=22.mp4 ! qtdemux name=
+demux2 demux2.video_0 ! queue ! decodebin ! videoscale ! videoconvert ! video/x-
+raw,format=AYUV,width=200,height=200 ! videobox  border-alpha=0 top=0 bottom=0 l
+eft=-220 ! mix. filesrc location=apink.mp4 ! qtdemux name=demux3 demux3.video_0 
+! queue ! decodebin ! videoscale ! videoconvert !  video/x-raw,format=AYUV,width
+=200,height=200 ! videobox border-alpha=0 top=-200 bottom=-200 left=0 ! mix. fil
+esrc location=2010.mp4 ! qtdemux name=demux4 demux4.video_0 !  queue ! decodebin
+ ! videoscale ! videoconvert ! video/x-raw,format=AYUV,width=200,height=200 ! vi
+deobox border-alpha=0 top=-200 bottom=-200 left=-200 ! mix. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
